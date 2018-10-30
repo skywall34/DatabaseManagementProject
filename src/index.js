@@ -3,16 +3,9 @@ let app = express();
 let appRoute = require('./routes/app_route');
 let path = require('path');
 let bodyParser = require('body-parser');
-var mysql = require('mysql');
+let mysql = require('mysql');
+let connection = require('./server.js');
 
-//local mysql db connection
-var connection = mysql.createConnection({
-    host     : 'localhost',
-		port		 : 3307,
-    user     : 'root',
-    password : 'skywall34',
-    database : 'dm_project'
-});
 
 connection.connect(function(err) {
     if (err) throw err;
