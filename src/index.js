@@ -1,10 +1,13 @@
 let express = require('express');
 let app = express();
-let appRoute = require('./routes/app_route');
+let app_route = require('./routes/app_route');
+let login_route = require('./routes/login_route');
 let path = require('path');
 let bodyParser = require('body-parser');
 let mysql = require('mysql');
 let connection = require('./server.js');
+let session = require('express-session');
+
 
 
 connection.connect(function(err) {
@@ -14,35 +17,18 @@ connection.connect(function(err) {
 		}
 });
 
+
+
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
-//Middleware function, orders of these handlers matter! Print incoming requests first
-//next is a reference to the next function in the pipeline
-app.use((req, res, next) => {
-	console.log(`${new Date().toString()} => ${req.originalUrl}`);
-
-	next(); //call the next chain of functions
-});
-
-//router call
-app.use(appRoute);
-
-// serve some static files
-// File can be called from the public folder which holds static files
-app.use(express.static('public'));
-
-// Handler for 404 - Resource Not Found
-app.use((req, res, next) => {
-	res.status(404).send('We think you are lost!');
-});
-
-
-// Handler for Error 500, We also created a static HTML file for this
-app.use((err, req, res, next) => {
-	console.error(err.stack);
-	res.sendFile(path.join(__dirname, '../public/500.html'));
-});
-
-
+app.use(express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 3000 ;
 app.listen(PORT, () => console.info(`Server has started on ${PORT}`));
+
+app.use(app_route);
+app.get('/', login_route.index);//call for main index page
+app.get('/login', login_route.index);//call for login page
+app.post('/login', login_route.login);//call for login post
+//app.get('/signup', routes.signup);//call for signup page

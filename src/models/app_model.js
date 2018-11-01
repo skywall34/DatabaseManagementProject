@@ -36,6 +36,17 @@ User.get_all_users = (result) => {
             });
 };
 
+User.get_user_by_value = (value_name, value, result) => {
+  sql.query(`SELECT * FROM users WHERE ${value_name} = ${value}`, function (err, res){
+    if (err) {
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+      result(null, res);
+    }
+  });
+};
+
 
 User.update_user_by_id = (user_id, target_column, target_value, result) => {
   sql.query(`UPDATE tasks SET ${target_column} = ${target_value} WHERE user_id = ${user_id}`,  function (err, res) {
