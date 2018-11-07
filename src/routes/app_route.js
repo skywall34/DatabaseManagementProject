@@ -102,11 +102,14 @@ function transaction_list_template(sql_list){
 
 
 
-//Create a router for users
-// When they login using user credentials
-
-
-
+// middleware function to check for logged-in users
+var sessionChecker = (req, res, next) => {
+    if (req.session.user && req.cookies.user_sid) {
+        res.redirect('/login');
+    } else {
+        next();
+    }
+};
 
 
 
@@ -114,7 +117,7 @@ function transaction_list_template(sql_list){
 // Create a router for the admin
 // When they login using admin credentials
 
-router.get('/user_report', (req, res) => {
+router.get('/user_report', sessionChecker, (req, res) => {
   User.get_all_users((err, user) => {
     console.log('router get users');
     if (err){
@@ -138,6 +141,60 @@ router.get('/user_report', (req, res) => {
       });
     }
   });
+});
+
+
+router.get('/user',sessionChecker, (req, res)=>{
+  var username = req.query.username;
+  var title = 'User Info';
+  var value = 'username';
+  console.log("Session name at user: ", req.session.username);
+  User.get_user_by_value(value,username,(err,user)=>{
+    console.log('call user by value');
+    console.log(user);
+    if (err){
+      res.send(err);
+      console.log('res', user);
+    } else {
+      res.render('user.ejs', {title: title, body: [user[0].username, user[0].balance]});
+    }
+  });
+});
+
+//TODO: Update the User balance when transaction is done
+//TODO: Check the user balance when making transaction
+router.post('/user',(req, res) => {
+  var post = req.body;
+  var to_user = post.to_user;
+  var amount = post.amount;
+  var from_user = req.session.username;
+  var value = 'username';
+  if (to_user == from_user) {
+    console.log('You cannot send points to yourself!');
+    res.redirect('/user');
+  } else {
+    User.get_user_by_value(value, from_user, (err, user) => {
+      if (err){
+        res.send(err);
+        console.log('user err res', user);
+      }else {
+         from_user_id = user[0].user_id;
+         Transaction.send_transaction(from_user_id, to_user, amount, (err, result) => {
+           console.log('starting transaction stored procedure');
+           if (err){
+             res.send(err);
+             console.log('res', result);
+           } else {
+             console.log('Transaction Successful!');
+             link = '/user?username=';
+             console.log(result);
+             redirection_link = link.concat(from_user);
+             res.redirect(redirection_link);
+           }
+         });
+      }
+    });
+  }
 });
 
 

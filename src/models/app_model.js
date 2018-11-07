@@ -37,7 +37,7 @@ User.get_all_users = (result) => {
 };
 
 User.get_user_by_value = (value_name, value, result) => {
-  sql.query(`SELECT * FROM users WHERE ${value_name} = ${value}`, function (err, res){
+  sql.query(`SELECT * FROM users WHERE ${value_name} = '${value}'`, function (err, res){
     if (err) {
       console.log("error: ", err);
       result(null, err);
@@ -49,7 +49,7 @@ User.get_user_by_value = (value_name, value, result) => {
 
 
 User.update_user_by_id = (user_id, target_column, target_value, result) => {
-  sql.query(`UPDATE tasks SET ${target_column} = ${target_value} WHERE user_id = ${user_id}`,  function (err, res) {
+  sql.query(`UPDATE tasks SET ${target_column} = '${target_value}' WHERE user_id = ${user_id}`,  function (err, res) {
           if(err) {
               console.log("error: ", err);
               result(null, err);
@@ -79,7 +79,7 @@ User.remove_user = function(id, result){
 // Giftcard functions
 
 Giftcard.create_card = (new_card, result) => {
-        sql.query(`INSERT INTO tasks set ${new_card}`, function (err, res) {
+        sql.query(`INSERT INTO tasks set '${new_card}'`, function (err, res) {
 
                 if(err) {
                     console.log("error: ", err);
@@ -123,7 +123,7 @@ Giftcard.remove_card = (id, result) => {
 
 //Transaction Model Functions
 Transaction.create_transaction = (new_transaction, result) => {
-        sql.query(`INSERT INTO transactions SET ${new_transaction}`, function (err, res) {
+        sql.query(`INSERT INTO transactions SET '${new_transaction}'`, function (err, res) {
 
                 if(err) {
                     console.log("error: ", err);
@@ -161,7 +161,7 @@ Transaction.get_all_transactions = (result) => {
             });
 };
 Transaction.update_transaction_by_id = (transaction_id, target_column, target_value, result) => {
-  sql.query(`UPDATE transactions SET ${target_column} = ${target_value} WHERE transaction_id = ${transaction_id}`,  function (err, res) {
+  sql.query(`UPDATE transactions SET ${target_column} = '${target_value}' WHERE transaction_id = ${transaction_id}`,  function (err, res) {
           if(err) {
               console.log("error: ", err);
               result(null, err);
@@ -183,6 +183,18 @@ Transaction.remove_transaction = (transaction_id, result) => {
                 }
             });
 };
+
+//this sends the stored procedure to make a transaction
+Transaction.send_transaction = (from_user, to_user, amount, result) => {
+  sql.query(`CALL send_transaction(${from_user},${to_user},${amount})`, function(err, res){
+    if(err){
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+      result(null, res);
+    }
+  });
+}
 
 
 module.exports= {User, Giftcard, Transaction};
