@@ -10,9 +10,15 @@ let User = (user) => {
   this.password = user.password;
   this.balance = user.balance;
   this.is_admin = user.is_admin;
+  this.monthly_points = user.monthly_points;
 };
 
-let Giftcard = {};
+let Giftcard = (card) =>{
+  this.card_id = card.card_id;
+  this.user_id = card.user_id;
+  this.points = card.points;
+  this.date_created = card.date_created;
+};
 
 let Transaction = (transaction) => {
     this.from_user = transaction.from_user;
@@ -60,21 +66,20 @@ User.update_user_by_id = (user_id, target_column, target_value, result) => {
             });
 };
 
-/*
-User.remove_user = function(id, result){
-     sql.query(`DELETE FROM users WHERE user_id = ${user_id}`, function (err, res) {
 
-                if(err) {
-                    console.log("error: ", err);
-                    result(null, err);
-                }
-                else{
-
-                 result(null, res);
-                }
-            });
+User.get_hoarding_users = (result) => {
+  sql.query('SELECT username, monthly_points FROM users WHERE monthly_points > 0', function(err, res){
+    if(err) {
+        console.log("error: ", err);
+        result(null, err);
+       }
+     else{
+       result(null, res);
+      }
+  });
 };
-*/
+
+
 
 // Giftcard functions
 
@@ -100,7 +105,7 @@ Giftcard.get_all_cards = (result) => {
                     result(null, err);
                 }
                 else{
-                  console.log('tasks : ', res);
+                  console.log('giftcards : ', res);
                   result(null, res);
                 }
             });
@@ -108,7 +113,7 @@ Giftcard.get_all_cards = (result) => {
 
 
 
-Giftcard.remove_card = (id, result) => {
+Giftcard.remove_card = (user_id, result) => {
      sql.query(`DELETE FROM giftcard WHERE user_id = ${user_id}`, function (err, res) {
 
                 if(err) {
@@ -121,9 +126,35 @@ Giftcard.remove_card = (id, result) => {
             });
 };
 
+//Giftcard View functions
+Giftcard.get_aggregate_card_points = (result) => {
+  sql.query('SELECT * FROM giftcard_points', function (err, res) {
+    if (err){
+      console.log("error: ", err);
+      result(null, err);
+    }else {
+      console.log("aggregate giftcard points: ", res);
+      result(null, res);
+    }
+  });
+};
+
+
+Giftcard.get_cards_by_month = (result) => {
+  sql.query('SELECT * FROM cards_by_month', function (err, res) {
+    if (err){
+      console.log("error: ", err);
+      result(null, err);
+    }else {
+      console.log("cards by month: ", res);
+      result(null, res);
+    }
+  });
+};
+
 //Transaction Model Functions
 Transaction.create_transaction = (new_transaction, result) => {
-        sql.query(`INSERT INTO transactions SET '${new_transaction}'`, function (err, res) {
+        sql.query(`INSERT INTO transactions VALUES '${new_transaction}'`, function (err, res) {
 
                 if(err) {
                     console.log("error: ", err);
@@ -135,7 +166,7 @@ Transaction.create_transaction = (new_transaction, result) => {
                 }
             });
 };
-Transaction.get_transaction_by_id = (transaction_id, result) => {
+Transaction.get_transactions_by_id = (transaction_id, result) => {
         sql.query(`SELECT * FROM transactions WHERE transaction_id = ${transaction_id} `,function (err, res) {
                 if(err) {
                     console.log("error: ", err);
@@ -143,10 +174,21 @@ Transaction.get_transaction_by_id = (transaction_id, result) => {
                 }
                 else{
                     result(null, res);
-
                 }
             });
 };
+
+Transaction.get_transactions_by_value = (value_name, value, result) => {
+  sql.query(`SELECT * FROM transactions WHERE ${value_name} = '${value}'`, function (err, res){
+    if (err) {
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+      result(null, res);
+    }
+  });
+};
+
 Transaction.get_all_transactions = (result) => {
         sql.query("SELECT * FROM transactions", function (err, res) {
 
@@ -185,8 +227,8 @@ Transaction.remove_transaction = (transaction_id, result) => {
 };
 
 //this sends the stored procedure to make a transaction
-Transaction.send_transaction = (from_user, to_user, amount, result) => {
-  sql.query(`CALL send_transaction(${from_user},${to_user},${amount})`, function(err, res){
+Transaction.send_transaction = (from_user, to_user, amount, message, result) => {
+  sql.query(`CALL send_transaction(${from_user},${to_user},${amount},'${message}')`, function(err, res){
     if(err){
       console.log("error: ", err);
       result(null, err);
@@ -196,9 +238,47 @@ Transaction.send_transaction = (from_user, to_user, amount, result) => {
   });
 }
 
+//Transaction views
+Transaction.get_all_used_points = (result) => {
+  sql.query('SELECT * FROM all_used_points', function(err, res){
+    if (err){
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+      result(null, res);
+    }
+  });
+}
+
+
+Transaction.get_points_by_month = (result) => {
+  sql.query('SELECT * FROM points_by_month', function(err, res){
+    if (err){
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+      result(null, res);
+    }
+  });
+}
+
+
+Transaction.get_user_points_received = (result) => {
+  sql.query('SELECT * FROM user_points_received', function(err, res){
+    if (err){
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+      result(null, res);
+    }
+  });
+}
+
+
 //Using views
 //sql: SELECT * FROM cards_by_month;
 // SELECT * FROM points_by_month;
+
 
 
 module.exports= {User, Giftcard, Transaction};
