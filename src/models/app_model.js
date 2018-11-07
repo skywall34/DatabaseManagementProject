@@ -49,7 +49,7 @@ User.get_user_by_value = (value_name, value, result) => {
 
 
 User.update_user_by_id = (user_id, target_column, target_value, result) => {
-  sql.query(`UPDATE tasks SET ${target_column} = '${target_value}' WHERE user_id = ${user_id}`,  function (err, res) {
+  sql.query(`UPDATE users SET ${target_column} = '${target_value}' WHERE user_id = ${user_id}`,  function (err, res) {
           if(err) {
               console.log("error: ", err);
               result(null, err);
@@ -78,16 +78,16 @@ User.remove_user = function(id, result){
 
 // Giftcard functions
 
-Giftcard.create_card = (new_card, result) => {
-        sql.query(`INSERT INTO tasks set '${new_card}'`, function (err, res) {
+Giftcard.create_card = (user_id, result) => {
+        sql.query(`INSERT INTO giftcard VALUES('${user_id}', 10000)`, function (err, res) {
 
                 if(err) {
                     console.log("error: ", err);
                     result(err, null);
                 }
                 else{
-                    console.log(res.insert_id);
-                    result(null, res.insert_id);
+                    console.log(res.card_id);
+                    result(null, res.card_id);
                 }
             });
 };
@@ -195,6 +195,10 @@ Transaction.send_transaction = (from_user, to_user, amount, result) => {
     }
   });
 }
+
+//Using views
+//sql: SELECT * FROM cards_by_month;
+// SELECT * FROM points_by_month;
 
 
 module.exports= {User, Giftcard, Transaction};

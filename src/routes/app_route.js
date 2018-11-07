@@ -57,6 +57,9 @@ function admin_html_template(title, body, etc){
          <ul class="nav navbar-nav">
         <li class="active"><a href="/">Home<span class="sr-only">(current)</span></a></li>
         <li><a href="/login">About us</a></li>
+        <li><a href="/aggregate_report">Aggregate Report</a></li>
+        <li><a href="/leftovers">Leftovers</a></li>
+        <li><a href="/redemptions">Redemptions</a></li>
       </ul>
   </nav>
   </div>
@@ -166,7 +169,7 @@ router.get('/user',sessionChecker, (req, res)=>{
 router.post('/user',(req, res) => {
   var post = req.body;
   var to_user = post.to_user;
-  var amount = post.amount;
+  var amount = parseInt(post.amount);
   var from_user = req.session.username;
   var value = 'username';
   if (to_user == from_user) {
@@ -179,23 +182,54 @@ router.post('/user',(req, res) => {
         console.log('user err res', user);
       }else {
          from_user_id = user[0].user_id;
+         user_amount = user[0].balance;
          Transaction.send_transaction(from_user_id, to_user, amount, (err, result) => {
            console.log('starting transaction stored procedure');
            if (err){
              res.send(err);
              console.log('res', result);
            } else {
-             console.log('Transaction Successful!');
-             link = '/user?username=';
-             console.log(result);
-             redirection_link = link.concat(from_user);
-             res.redirect(redirection_link);
+             //Update the User Balances
+             target_column = 'balance'
+             from_target_value = user_amount - amount;
+             to_target_value = user_amount + amount;
+             console.log('from_target_value: ', from_target_value);
+             console.log('to_target_value: ', to_target_value);
+             //for the from_user
+             User.update_user_by_id(from_user_id, target_column, from_target_value, (err, update_result)=>{
+               if(err){
+                 res.send(err);
+                 console.log('update res: ', update_result);
+               } else{
+                 // for the to user
+                 User.update_user_by_id(to_user, target_column, to_target_value, (err, update_to_result) =>{
+                   if (err){
+                     res.send(err);
+                     console.log('update to res: ', update_to_result);
+                   } else {
+                     console.log('result: ', update_to_result);
+                     console.log('Transaction Successful!');
+                     link = '/user?username=';
+                     console.log(result);
+                     redirection_link = link.concat(from_user);
+                     res.redirect(redirection_link);
+                   }
+                 })
+               }
+             });
+
            }
          });
       }
     });
   }
 });
+
+//aggregate_report
+//TODO: use the views from the models
+//leftovers
+
+//redemptions
 
 
 
