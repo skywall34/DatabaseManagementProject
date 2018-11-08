@@ -1,0 +1,35 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Site</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"/>
+
+</head>
+<body id="clrblk">
+        <div class="container">
+        <div id="loginbox" style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+            <div class="panel panel-info" >
+                    <div class="panel-heading">
+                        <div class="panel-title">User Cards</div>
+                        <!--<div style="float:right; font-size: 80%; position: relative; top:-10px"><a href="#">Forgot password?</a></div>-->
+                    </div>
+
+                    <div style="padding-top:30px" class="panel-body" >
+
+
+                            <div class="report1">
+                              <p>Your Cards</p>
+                              <%- report1 %>
+                            </div>
+
+                            <form name="myform" action="/giftcards" method="post">
+                              <p>If you don't have enough points this will send you right back here!!</p>
+                              <button>Redeem 10000 points for one card</button>
+                            </form>
+                        </div>
+                    </div>
+        </div>
+
+    </div>
+</body>
+</html>

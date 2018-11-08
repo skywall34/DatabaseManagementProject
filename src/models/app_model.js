@@ -124,6 +124,20 @@ Giftcard.get_all_cards = (result) => {
             });
 };
 
+Giftcard.get_card_by_user = (user_id, result) => {
+        sql.query(`Select * from giftcard WHERE user_id = ${user_id}`, function (err, res) {
+
+                if(err) {
+                    console.log("error: ", err);
+                    result(null, err);
+                }
+                else{
+                  console.log('giftcards : ', res);
+                  result(null, res);
+                }
+            });
+};
+
 
 
 Giftcard.remove_card = (user_id, result) => {
@@ -164,6 +178,27 @@ Giftcard.get_cards_by_month = (result) => {
     }
   });
 };
+
+
+Giftcard.redeem_points = (user_id, result) => {
+  sql.query(`INSERT INTO giftcard (user_id, points, date_created) VALUES (${user_id}, 10000, NOW())`, function(err, res){
+      if (err){
+        console.log("error: ", err);
+        result(null, err);
+      } else {
+        sql.query(`UPDATE users SET balance = balance - 10000 WHERE user_id = ${user_id}`, function(err, user_res){
+          if (err){
+            console.log("error: ", err);
+            result(null, err)
+          } else{
+            console.log("Points Redeemed");
+            result(null, user_res);
+          }
+        });
+      }
+  });
+};
+
 
 //Transaction Model Functions
 Transaction.create_transaction = (new_transaction, result) => {

@@ -158,6 +158,17 @@ function transaction_message_template(sql_list){
 }
 
 
+function cards_template(sql_list){
+  var list = '<ul>';
+  var i = 0;
+  while(i < sql_list.length){
+    list = list + `<li><p>Card ID: ${sql_list[i].card_id}</p><p>Points Spent For Card: ${sql_list[i].points}</p><p>Card Worth: $100 </p></li>`;
+    i = i + 1;
+  }
+  list = list+'</ul>';
+  return list;
+}
+
 
 
 
@@ -204,7 +215,7 @@ router.get('/user_report', sessionChecker, (req, res) => {
 
 
 router.get('/user',sessionChecker, (req, res)=>{
-  var username = req.query.username;
+  var username = req.session.username;
   var title = 'User Info';
   var value = 'username';
   console.log("Session name at user: ", req.session.username);
@@ -229,12 +240,10 @@ router.post('/user',(req, res) => {
   var from_user = req.session.username;
   var value = 'username';
   if (amount < 0 || amount > 1000){
-    console.log('Wrong amount input!');
-    res.redirect('/user');
-  }
-  if (to_user == from_user) {
-    console.log('You cannot send points to yourself!');
-    res.redirect('/user');
+    //console.log('Wrong amount input!');
+    link = '/user?username=';
+    redirection_link = link.concat(from_user);
+    res.redirect(redirection_link);
   } else {
     User.get_user_by_value(value, from_user, (err, user) => {
       if (err){
@@ -244,53 +253,61 @@ router.post('/user',(req, res) => {
          from_user_id = user[0].user_id;
          user_amount = user[0].balance;
          user_monthly = user[0].monthly_points;
-         Transaction.send_transaction(from_user_id, to_user, amount, message, (err, result) => {
-           console.log('starting transaction stored procedure');
-           if (err){
-             res.send(err);
-             console.log('res', result);
-           } else {
-             //Update the User Balances and monthly_points
-             target_column = 'balance'
-             from_target_value = user_amount - amount;
-             to_target_value = user_amount + amount;
-             console.log('from_target_value: ', from_target_value);
-             console.log('to_target_value: ', to_target_value);
-             //for the from_user
-             User.update_user_by_id(from_user_id, target_column, from_target_value, (err, update_result)=>{
-               if(err){
-                 res.send(err);
-                 console.log('update res: ', update_result);
-               } else{
-                 // for the to user
-                 User.update_user_by_id(to_user, target_column, to_target_value, (err, update_to_result) =>{
-                   if (err){
-                     res.send(err);
-                     console.log('update to res: ', update_to_result);
-                   } else {
-                     //update monthly_points for the from_user only
-                     target_column = 'monthly_points'
-                     new_monthly_points = user_monthly - amount;
-                     User.update_user_by_id(from_user_id, target_column, new_monthly_points, (err, monthly_points_result)=>{
-                       if (err){
-                         res.send(err);
-                         console.log('monthly error res: ', monthly_points_result);
-                       } else {
-                         console.log('result: ', monthly_points_result);
-                         console.log('Transaction Successful!');
-                         link = '/user?username=';
-                         console.log(result);
-                         redirection_link = link.concat(from_user);
-                         res.redirect(redirection_link);
-                       }
-                     });
+         if (to_user == from_user_id) {
+          //console.log('You cannot send points to yourself!');
+          link = '/user?username=';
+          redirection_link = link.concat(from_user);
+          res.redirect(redirection_link);
+        } else{
+          Transaction.send_transaction(from_user_id, to_user, amount, message, (err, result) => {
+            console.log('starting transaction stored procedure');
+            if (err){
+              res.send(err);
+              console.log('res', result);
+            } else {
+              //Update the User Balances and monthly_points
+              target_column = 'balance'
+              from_target_value = user_amount - amount;
+              to_target_value = user_amount + amount;
+              //console.log('from_target_value: ', from_target_value);
+              //console.log('to_target_value: ', to_target_value);
+              //for the from_user
+              User.update_user_by_id(from_user_id, target_column, from_target_value, (err, update_result)=>{
+                if(err){
+                  res.send(err);
+                  console.log('update res: ', update_result);
+                } else{
+                  // for the to user
+                  User.update_user_by_id(to_user, target_column, to_target_value, (err, update_to_result) =>{
+                    if (err){
+                      res.send(err);
+                      console.log('update to res: ', update_to_result);
+                    } else {
+                      //update monthly_points for the from_user only
+                      target_column = 'monthly_points'
+                      new_monthly_points = user_monthly - amount;
+                      User.update_user_by_id(from_user_id, target_column, new_monthly_points, (err, monthly_points_result)=>{
+                        if (err){
+                          res.send(err);
+                          console.log('monthly error res: ', monthly_points_result);
+                        } else {
+                          //console.log('result: ', monthly_points_result);
+                          console.log('Transaction Successful!');
+                          link = '/user?username=';
+                          console.log(result);
+                          redirection_link = link.concat(from_user);
+                          res.redirect(redirection_link);
+                        }
+                      });
 
-                   }
-                 });
-               }
-             });
-           }
-         });
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+
       }
     });
   }
@@ -381,7 +398,7 @@ router.get('/messages', sessionChecker, (req, res)=>{
 
 
 
-//RESET 
+//RESET
 router.get('/reset', sessionChecker, (req, res)=>{
   User.reset((err, result) => {
     if(err){
@@ -390,6 +407,59 @@ router.get('/reset', sessionChecker, (req, res)=>{
     } else {
       console.log('Reset Successful!');
       res.redirect('/user_report');
+    }
+  });
+});
+
+
+//Messages
+router.get('/giftcards', sessionChecker, (req, res)=>{
+  //get the user_id
+  var value_name = 'username';
+  var value = req.session.username;
+  User.get_user_by_value(value_name, value, (err, user_result)=>{
+    if (err){
+      res.send(err);
+      console.log('error res: ', user_result);
+    } else {
+      var user_id = user_result[0].user_id
+      Giftcard.get_card_by_user(user_id, (err, cards_result)=>{
+        if (err){
+          res.send(err);
+          console.log('error res: ', cards_result);
+        } else{
+          var cards = cards_template(cards_result);
+          res.render('user_giftcards.ejs', {report1: cards});
+        }
+      });
+    }
+  });
+
+});
+
+router.post('/giftcards', sessionChecker, (req, res)=>{
+  var value_name = 'username';
+  var value = req.session.username;
+  User.get_user_by_value(value_name, value, (err, user_result)=>{
+    if (err){
+      res.send(err);
+      console.log('error res: ', user_result);
+    }else{
+      if (user_result[0].balance < 10000){
+        console.log("Need more points to do this!");
+        res.redirect('/giftcards');
+      } else{
+        var user_id = user_result[0].user_id
+        Giftcard.redeem_points(user_id, (err, redeem_result)=>{
+        if (err){
+          res.send(err);
+          console.log('error res: ', redeem_result);
+        } else {
+          res.redirect('/giftcards');
+        }
+      });
+    }
+
     }
   });
 });
