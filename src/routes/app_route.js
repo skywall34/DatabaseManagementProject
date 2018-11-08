@@ -226,7 +226,7 @@ router.get('/user',sessionChecker, (req, res)=>{
       res.send(err);
       console.log('res', user);
     } else {
-      res.render('user.ejs', {title: title, body: user[0].username, balance: user[0].balance, monthly_points: user[0].monthly_points});
+      res.render('user.ejs', {title: title, body: [user[0].username, user[0].user_id], balance: user[0].balance, monthly_points: user[0].monthly_points});
     }
   });
 });
@@ -235,6 +235,7 @@ router.get('/user',sessionChecker, (req, res)=>{
 router.post('/user',(req, res) => {
   var post = req.body;
   var to_user = post.to_user;
+  console.log(to_user);
   var amount = parseInt(post.amount);
   var message = post.message;
   var from_user = req.session.username;
@@ -269,8 +270,9 @@ router.post('/user',(req, res) => {
               target_column = 'balance'
               from_target_value = user_amount - amount;
               to_target_value = user_amount + amount;
-              //console.log('from_target_value: ', from_target_value);
-              //console.log('to_target_value: ', to_target_value);
+              console.log('to_user value: ', to_user);
+              console.log('from_target_value: ', from_target_value);
+              console.log('to_target_value: ', to_target_value);
               //for the from_user
               User.update_user_by_id(from_user_id, target_column, from_target_value, (err, update_result)=>{
                 if(err){
@@ -284,6 +286,7 @@ router.post('/user',(req, res) => {
                       console.log('update to res: ', update_to_result);
                     } else {
                       //update monthly_points for the from_user only
+                      console.log(update_to_result);
                       target_column = 'monthly_points'
                       new_monthly_points = user_monthly - amount;
                       User.update_user_by_id(from_user_id, target_column, new_monthly_points, (err, monthly_points_result)=>{

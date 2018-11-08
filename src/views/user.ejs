@@ -22,8 +22,11 @@
 </div>
 <br/>
 <div class="jumbotron"> <p>
-Username: <%= body %>
-</p></div>
+Username: <%= body[0] %>
+User ID: <%= body[1]%>
+</p>
+<p>Make sure to send points based on User ID not Username!</p>
+</div>
 <div class="jumbotron">
   <form action="/user" method="post">
     Current Balance : <%- balance %> <br>
