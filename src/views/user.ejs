@@ -22,10 +22,12 @@
 </div>
 <br/>
 <div class="jumbotron"> <p>
-<%= body %>
+Username: <%= body %>
 </p></div>
 <div class="jumbotron">
   <form action="/user" method="post">
+    Current Balance : <%- balance %> <br>
+    Current Monthly Points: <%- monthly_points %> <br>
     Send To: <input type="text" name="to_user"><br>
     Amount: <input type="text" name="amount"><br>
     Message (Optional): <input type="text" name="message"><br>

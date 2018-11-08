@@ -56,7 +56,7 @@ function admin_html_template(title, body, etc){
   <nav class="navbar navbar-inverse" role="navigation" style="padding-left:130px;">
          <ul class="nav navbar-nav">
         <li class="active"><a href="/">Home<span class="sr-only">(current)</span></a></li>
-        <li><a href="/login">About us</a></li>
+        <li><a href="/reset">RESET</a></li>
         <li><a href="/aggregate_report">Aggregate Report</a></li>
         <li><a href="/leftovers">Leftovers</a></li>
         <li><a href="/redemptions">Redemptions</a></li>
@@ -83,7 +83,7 @@ function user_list_template(sql_list){
   var list = '<ul>';
   var i = 0;
   while(i < sql_list.length){
-    list = list + `<li><a href="/?id=${sql_list[i].user_id}">${sql_list[i].username}</a></li>`;
+    list = list + `<li><p>Username: ${sql_list[i].username} Balance: ${sql_list[i].balance} Monthly Balance: ${sql_list[i].monthly_points}</p></li>`;
     i = i + 1;
   }
   list = list+'</ul>';
@@ -95,7 +95,7 @@ function transaction_list_template(sql_list){
   var list = '<ul>';
   var i = 0;
   while(i < sql_list.length){
-    list = list + `<li><a href="/?id=${sql_list[i].transaction_id}">${sql_list[i].transaction_id}</a><p>${sql_list[i].from_user}</p><p>${sql_list[i].to_user}</p><p>${sql_list[i].trans_date}</p><p>${sql_list[i].amount}</p><p>${sql_list[i].message}</p></li>`;
+    list = list + `<li>Transaction ID: ${sql_list[i].transaction_id}<p>Sender ID: ${sql_list[i].from_user}</p><p>Receiver ID: ${sql_list[i].to_user}</p><p> Transaction Day and Time: ${sql_list[i].trans_date}</p><p>Transaction Amount: ${sql_list[i].amount}</p><p>Transaction Message: ${sql_list[i].message}</p></li>`;
     i = i + 1;
   }
   list = list+'</ul>';
@@ -106,7 +106,7 @@ function trans_point_list_template(sql_list){
   var list = '<ul>';
   var i = 0;
   while(i < sql_list.length){
-    list = list + `<li><p>${sql_list[i].month}</p><p>${sql_list[i].monthly_points}</p></li>`;
+    list = list + `<li><p>Month: ${sql_list[i].month}</p><p>Points: ${sql_list[i].monthly_points}</p></li>`;
     i = i + 1;
   }
   list = list+'</ul>';
@@ -117,7 +117,7 @@ function card_point_list_template(sql_list){
   var list = '<ul>';
   var i = 0;
   while(i < sql_list.length){
-    list = list + `<li><p>${sql_list[i].month}</p><p>${sql_list[i].points}</p></li>`;
+    list = list + `<li><p>Month: ${sql_list[i].month}</p><p>Points: ${sql_list[i].points}</p></li>`;
     i = i + 1;
   }
   list = list+'</ul>';
@@ -128,7 +128,7 @@ function points_received_list_template(sql_list){
   var list = '<ul>';
   var i = 0;
   while(i < sql_list.length){
-    list = list + `<li><p>${sql_list[i].user_id}</p><p>${sql_list[i].tot_amount}</p></li>`;
+    list = list + `<li><p>User ID: ${sql_list[i].user_id}</p><p>Amount Received: ${sql_list[i].tot_amount}</p></li>`;
     i = i + 1;
   }
   list = list+'</ul>';
@@ -139,7 +139,7 @@ function hoarding_users_template(sql_list){
   var list = '<ul>';
   var i = 0;
   while(i < sql_list.length){
-    list = list + `<li><p>${sql_list[i].username}</p><p>${sql_list[i].monthly_points}</p></li>`;
+    list = list + `<li><p>Hoarder: ${sql_list[i].username}</p><p>Points Held: ${sql_list[i].monthly_points}</p></li>`;
     i = i + 1;
   }
   list = list+'</ul>';
@@ -150,7 +150,7 @@ function transaction_message_template(sql_list){
   var list = '<ul>';
   var i = 0;
   while(i < sql_list.length){
-    list = list + `<li><a href="/?id=${sql_list[i].transaction_id}">${sql_list[i].transaction_id}</a><p>${sql_list[i].from_user}</p><p>${sql_list[i].to_user}</p><p>${sql_list[i].message}</p></li>`;
+    list = list + `<li>Transaction ID: ${sql_list[i].transaction_id}<p>Sender: ${sql_list[i].from_user}</p><p>Receiver: ${sql_list[i].to_user}</p><p>Message: ${sql_list[i].message}</p></li>`;
     i = i + 1;
   }
   list = list+'</ul>';
@@ -215,7 +215,7 @@ router.get('/user',sessionChecker, (req, res)=>{
       res.send(err);
       console.log('res', user);
     } else {
-      res.render('user.ejs', {title: title, body: [user[0].username, user[0].balance]});
+      res.render('user.ejs', {title: title, body: user[0].username, balance: user[0].balance, monthly_points: user[0].monthly_points});
     }
   });
 });
@@ -381,7 +381,18 @@ router.get('/messages', sessionChecker, (req, res)=>{
 
 
 
-
+//RESET 
+router.get('/reset', sessionChecker, (req, res)=>{
+  User.reset((err, result) => {
+    if(err){
+      res.send(err);
+      console.log('error res: ', result);
+    } else {
+      console.log('Reset Successful!');
+      res.redirect('/user_report');
+    }
+  });
+});
 
 
 module.exports = router;

@@ -80,6 +80,19 @@ User.get_hoarding_users = (result) => {
 };
 
 
+User.reset = (result) => {
+  sql.query(`UPDATE users SET monthly_points = 1000`,  function (err, res) {
+          if(err) {
+              console.log("error: ", err);
+              result(null, err);
+             }
+           else{
+             result(null, res);
+                }
+            });
+};
+
+
 
 // Giftcard functions
 
