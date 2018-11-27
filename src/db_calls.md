@@ -46,17 +46,17 @@ INSERT INTO users VALUES (4, 'employee4', PASSWORD('employee4'), 1000, 0, 1000);
 INSERT INTO users VALUES (5, 'employee5', PASSWORD('employee5'), 1000, 0, 1000);
 
 
-INSERT INTO transactions VALUES (1,3, 5, '2018-10-26 17:00:00', 50, 'message');
-INSERT INTO transactions VALUES (2,2, 5, '2018-10-26 17:00:00', 100, 'Hey thanks!');
-INSERT INTO transactions VALUES (3,5, 3, '2018-10-26 17:00:00', 100, 'Awesome!');
-INSERT INTO transactions VALUES (4,3, 4, '2018-10-26 17:00:00', 200, 'You are the best!');
+INSERT INTO transactions(from_user, to_user, trans_date, amount, message) VALUES (3, 5, '2018-10-26 17:00:00', 50, 'message');
+INSERT INTO transactions(from_user, to_user, trans_date, amount, message) VALUES (2, 5, '2018-10-26 17:00:00', 100, 'Hey thanks!');
+INSERT INTO transactions(from_user, to_user, trans_date, amount, message) VALUES (5, 3, '2018-10-26 17:00:00', 100, 'Awesome!');
+INSERT INTO transactions(from_user, to_user, trans_date, amount, message) VALUES (3, 4, '2018-10-26 17:00:00', 200, 'You are the best!');
 
 
 
-INSERT INTO giftcard VALUES (0, 1, 10000, '2018-10-26 8:00:00');
-INSERT INTO giftcard VALUES (1, 4, 10000, '2018-10-28 12:00:00');
-INSERT INTO giftcard VALUES (2, 5, 10000, '2018-10-14 9:00:00');
-INSERT INTO giftcard VALUES (3, 3, 10000, '2018-10-20 17:00:00');
+INSERT INTO giftcard(user_id, points, date_created) VALUES ( 1, 10000, '2018-10-26 8:00:00');
+INSERT INTO giftcard(user_id, points, date_created) VALUES ( 4, 10000, '2018-10-28 12:00:00');
+INSERT INTO giftcard(user_id, points, date_created) VALUES ( 5, 10000, '2018-10-14 9:00:00');
+INSERT INTO giftcard(user_id, points, date_created) VALUES (3, 10000, '2018-10-20 17:00:00');
 
 
 # Stored Procedure
